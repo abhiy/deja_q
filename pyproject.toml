@@ -1,0 +1,16 @@
+[project]
+name = "deja-q"
+version = "0.1.0"
+description = "Deja Q is a Slack app that helps users find answers to their questions by automatically searching for similar questions that have been asked before"
+authors = [
+    {name = "Abhimanyu Yadav",email = "abhiy.iitk@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
