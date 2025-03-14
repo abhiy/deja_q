@@ -1,34 +1,37 @@
 import os
-import inspect
-import slack_sdk
-from slack_sdk.rtm_v2 import RTMClient
-from slack_sdk.web import WebClient
+import logging
+from flask import Flask, request, jsonify
+from slackeventsapi import SlackEventAdapter
 from dotenv import load_dotenv
-load_dotenv() 
 
-# Make sure we have the token
-SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
-if not SLACK_BOT_TOKEN:
-    raise ValueError("SLACK_BOT_TOKEN environment variable is not set")
+# Load environment variables
+load_dotenv()
 
-# Create RTM client
-rtm = RTMClient(token=SLACK_BOT_TOKEN)
+SLACK_SIGNING_SECRET = os.getenv("SLACK_SIGNING_SECRET")
 
-# Create a separate web client for sending messages
-web_client = WebClient(token=SLACK_BOT_TOKEN)
+# Initialize Flask app
+app = Flask(__name__)
 
-# Define the message handler separately first
-@rtm.on("message")
-def handle_message(client, event):
-    """Handle incoming message events."""
-    print(f"Received message: {event}")
-    # Additional message handling logic can go here
+# Initialize Slack Events API adapter
+slack_events_adapter = SlackEventAdapter(SLACK_SIGNING_SECRET, "/slack/events", app)
 
-# Debug: Print function signature information
-print(f"Function name: {handle_message.__name__}")
-print(f"Function signature: {inspect.signature(handle_message)}")
-print(f"Function parameters: {list(inspect.signature(handle_message).parameters.keys())}")
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
+# Event listener for messages
+@slack_events_adapter.on("message")
+def handle_message(event_data):
+    message = event_data["event"]
+    
+    # Ignore messages from bots to prevent loops
+    if message.get("subtype") is None:
+        logging.info(f"Received message: {message['text']} from {message['user']} in {message['channel']}")
+
+# Health check route
+@app.route("/", methods=["GET"])
+def health_check():
+    return "Slack Bot is running!", 200
+
+# Run the app
 if __name__ == "__main__":
-    print("Starting RTM client...")
-    rtm.start()
+    app.run(port=3000)
