@@ -19,10 +19,23 @@ class MessageHandler:
         """Handle incoming message events."""
         message = event_data["event"]
         
+        # Log the incoming event
+        logging.info(f"\n{'='*40} New Message Event {'='*40}")
+        logging.info(f"Message ID: {message.get('client_msg_id', 'No client_msg_id')}")
+        logging.info(f"Message TS: {message.get('ts', 'No ts')}")
+        logging.info(f"Thread TS: {message.get('thread_ts', 'No thread_ts')}")
+        logging.info(f"Event Type: {message.get('type', 'No type')}")
+        logging.info(f"Subtype: {message.get('subtype', 'No subtype')}")
+        logging.info(f"Bot ID: {message.get('bot_id', 'No bot_id')}")
+        logging.info(f"App ID: {message.get('app_id', 'No app_id')}")
+        logging.info(f"User: {message.get('user', 'No user')}")
+        logging.info(f"Text: {message.get('text', 'No text')}")
+        
         # Ignore messages that are:
         # - from bots/apps
         # - part of a thread (have a thread_ts)
         # - have no real user
+        # - message_changed events
         if (message.get("subtype") is None and    # No subtype (regular message)
                 not message.get("bot_id") and      # Not from a bot
                 not message.get("app_id") and      # Not from an app
@@ -34,11 +47,35 @@ class MessageHandler:
                 channel_info = self.client.conversations_info(channel=message["channel"])
                 channel_name = channel_info["channel"]["name"]
                 
+                # Log channel info
+                logging.info(f"Channel Name: {channel_name}")
+                logging.info(f"Channel ID: {message['channel']}")
+                
                 # Check if this is the prototype channel
                 if channel_name == self.vector_store.channel_name:
+                    logging.info("Processing message in prototype channel")
                     self._process_message(message, message["channel"])
+                else:
+                    logging.info(f"Ignoring message - not in prototype channel (got {channel_name}, expected {self.vector_store.channel_name})")
             except Exception as e:
                 logging.error(f"Error handling message: {str(e)}")
+        else:
+            # Log why message was ignored
+            reasons = []
+            if message.get("subtype") is not None:
+                reasons.append(f"has subtype: {message.get('subtype')}")
+            if message.get("bot_id"):
+                reasons.append("from bot")
+            if message.get("app_id"):
+                reasons.append("from app")
+            if message.get("thread_ts"):
+                reasons.append("is thread reply")
+            if not message.get("user"):
+                reasons.append("no user")
+            
+            logging.info(f"Ignoring message because: {', '.join(reasons)}")
+        
+        logging.info(f"{'='*90}\n")
 
     def _process_message(self, message: dict, channel_id: str) -> None:
         """Process a message and find similar previous messages."""

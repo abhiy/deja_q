@@ -87,30 +87,28 @@ class OllamaClient:
         responses = messages[1:]
         
         # Format the thread content
-        thread_content = f"""Original Question:
-{question}
+        thread_content = f"""Question: {question}
 
-Responses:
+Thread Messages:
 {chr(10).join(f'- {response}' for response in responses)}"""
 
         # Construct the prompt
-        prompt = f"""Given this Slack thread, extract and summarize the answer to the question. If there is no clear answer, explicitly state that.
+        prompt = f"""Extract only information that is explicitly mentioned in this thread.
 
 {thread_content}
 
 Instructions:
-1. Focus ONLY on responses that attempt to answer the question
-2. If there are multiple valid answers, combine them into a coherent summary
-3. If there is no clear answer in the responses, respond with "No clear answer was provided in the thread."
-4. Ignore any follow-up questions or off-topic discussions
-5. Be concise but include important technical details
+- Provide a single-line summary using ONLY information stated in the thread messages
+- Include specific technical details that were mentioned
+- Do not add external knowledge or make assumptions
+- If no relevant information exists, say "No relevant information found"
 
-Summary:"""
+One-line summary of what was mentioned:"""
         
-        system_prompt = """You are a precise technical assistant that extracts answers from Slack threads.
-Your goal is to find and summarize ONLY the answer to the original question.
-If no clear answer exists, you must say so.
-Do not include speculation or information not directly related to answering the original question."""
+        system_prompt = """You are a precise information extractor that only reports what was explicitly stated in thread messages.
+Restrict yourself to ONLY information that appears in the messages - do not add external knowledge or make assumptions.
+Focus on being accurate to what was actually said rather than being comprehensive.
+Always respond with a single line of text containing only information from the thread."""
         
         return {
             "prompt": prompt,
