@@ -10,7 +10,7 @@ load_dotenv()
 
 SLACK_SIGNING_SECRET = os.getenv("SLACK_SIGNING_SECRET")
 SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
-PROTOTYPE_CHANNEL_NAME = '#prototype'
+PROTOTYPE_CHANNEL_NAME = 'prototype'
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -27,8 +27,11 @@ logging.basicConfig(level=logging.INFO)
 def handle_message(event_data):
     message = event_data["event"]
     
-    # Ignore messages from bots to prevent loops
-    if message.get("subtype") is None:
+    # Ignore messages from bots and apps to prevent loops
+    if (message.get("subtype") is None and  # No subtype (regular message)
+            not message.get("bot_id") and    # Not from a bot
+            not message.get("app_id") and    # Not from an app
+            message.get("user")):            # Has a real user
         try:
             # Get channel info
             channel_info = client.conversations_info(channel=message["channel"])
