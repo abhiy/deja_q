@@ -2,17 +2,21 @@ import os
 import logging
 from flask import Flask, request, jsonify
 from slackeventsapi import SlackEventAdapter
+from slack_sdk import WebClient
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
 SLACK_SIGNING_SECRET = os.getenv("SLACK_SIGNING_SECRET")
+SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
+PROTOTYPE_CHANNEL_NAME = '#prototype'
 
 # Initialize Flask app
 app = Flask(__name__)
 
-# Initialize Slack Events API adapter
+# Initialize Slack client and Events API adapter
+client = WebClient(token=SLACK_BOT_TOKEN)
 slack_events_adapter = SlackEventAdapter(SLACK_SIGNING_SECRET, "/slack/events", app)
 
 # Configure logging
@@ -25,6 +29,23 @@ def handle_message(event_data):
     
     # Ignore messages from bots to prevent loops
     if message.get("subtype") is None:
+        try:
+            # Get channel info
+            channel_info = client.conversations_info(channel=message["channel"])
+            channel_name = channel_info["channel"]["name"]
+            
+            # Check if this is the prototype channel
+            if channel_name == PROTOTYPE_CHANNEL_NAME:
+                # Reply to the message
+                response = client.chat_postMessage(
+                    channel=message["channel"],
+                    thread_ts=message.get("ts"),
+                    text="If I had access to a vector DB of previously posted messages, and an LLM, I would have helped you with an answer"
+                )
+                logging.info(f"Sent response to message: {message['text']}")
+        except Exception as e:
+            logging.error(f"Error handling message: {str(e)}")
+        
         logging.info(f"Received message: {message['text']} from {message['user']} in {message['channel']}")
 
 # Health check route
