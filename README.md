@@ -6,18 +6,14 @@ Deja Q is a Slack app that helps users find answers to their questions by automa
 
 ### Local Development
 
-1. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
 
-2. Set up your environment variables in a `.env` file:
+1. Set up your environment variables in a `.env` file:
    ```
    SLACK_SIGNING_SECRET=your_signing_secret
    SLACK_BOT_TOKEN=your_bot_token
    ```
 
-3. Start the local Flask server:
+2. Start the local Flask server:
    ```bash
    python deja_q/bot.py
    ```
