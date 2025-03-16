@@ -69,7 +69,10 @@ class MessageHandler:
                 
                 # Generate a summary of the thread
                 if thread_messages:
-                    summary = self.ollama.summarize_thread(thread_messages)
+                    summary = self.ollama.summarize_thread(
+                        thread_messages,
+                        thread_id=best_match["ts"]  # Pass the thread timestamp as identifier
+                    )
                     
                     response = (
                         f"I found a similar question that was asked before! "
