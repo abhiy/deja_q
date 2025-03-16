@@ -34,7 +34,11 @@ To make your local bot accessible to Slack, you'll need to expose it using ngrok
 
 4. Copy the HTTPS URL provided by ngrok (e.g., `https://your-unique-id.ngrok.io`)
 
-5. Update your Slack app's Event Subscriptions URL in the Slack API dashboard to:
-   `https://your-unique-id.ngrok.io/slack/events`
+
+5. Update your Slack app settings:
+   - Go to your Slack App settings in the Slack API dashboard
+   - Navigate to "Event Subscriptions"
+   - Enable Events if not already enabled
+   - Paste your full URL with `/slack/events` into the "Request URL" field
 
 Note: The ngrok URL changes each time you restart ngrok unless you have a paid account. Make sure to update your Slack app's Event Subscriptions URL whenever the ngrok URL changes.

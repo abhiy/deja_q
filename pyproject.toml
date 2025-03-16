@@ -6,13 +6,10 @@ authors = [
     {name = "Abhimanyu Yadav",email = "abhiy.iitk@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
     "slack-sdk (>=3.34.0,<4.0.0)",
-    "pandas (>=2.2.3,<3.0.0)",
-    "scikit-learn (>=1.6.1,<2.0.0)",
     "python-dotenv (>=1.0.1,<2.0.0)",
-    "slack-bolt (>=1.22.0,<2.0.0)",
     "flask (>=3.1.0,<4.0.0)",
     "slackeventsapi (>=3.0.3,<4.0.0)"
 ]
